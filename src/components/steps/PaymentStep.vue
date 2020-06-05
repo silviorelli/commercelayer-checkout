@@ -42,6 +42,7 @@ import { mapFields } from 'vuex-map-fields'
 import { mapState } from 'vuex'
 
 import AdyenCard from '@/components/payments/adyen/AdyenCard'
+import AdyenDropin from '@/components/payments/adyen/AdyenDropin'
 import BraintreeCard from '@/components/payments/braintree/BraintreeCard'
 import StripeCard from '@/components/payments/stripe/StripeCard'
 import PaypalPayment from '@/components/payments/PaypalPayment'
@@ -50,6 +51,7 @@ import WireTransfer from '@/components/payments/WireTransfer'
 export default {
   components: {
     AdyenCard,
+    AdyenDropin,
     BraintreeCard,
     StripeCard,
     PaypalPayment,
@@ -62,6 +64,7 @@ export default {
     },
     availablePaymentOptions () {
       let paymentOptions = []
+      console.log('DEBUG PaymentStep this.order:', this.order)
       _.each(this.order.available_payment_methods, paymentMethod => {
         switch (paymentMethod.payment_source_type) {
           case 'adyen_payments':
@@ -72,6 +75,11 @@ export default {
               paymentOptions.push({
                 payment_method: paymentMethod,
                 component: 'AdyenCard',
+                priority: 1
+              })
+              paymentOptions.push({
+                payment_method: paymentMethod,
+                component: 'AdyenDropin',
                 priority: 1
               })
               // More Adyen Payment Methods go here
