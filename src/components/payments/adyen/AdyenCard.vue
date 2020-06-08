@@ -82,8 +82,8 @@ export default {
           payment_request_data: {
             payment_method: state.data.paymentMethod,
             origin: window.location.origin,
-            return_url: window.location.href,
-            browser_info: {
+            returnUrl: window.location.href,
+            browserInfo: {
               acceptHeader:
                 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
               colorDepth: browserInfo.colorDepth,
