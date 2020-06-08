@@ -20,146 +20,6 @@
 import { paymentMixin } from '@/mixins/paymentMixin'
 import { collectBrowserInfo } from '@/utils/functions'
 
-// DEBUG TODO remove
-const paymentMethodMock = {
-  "groups": [
-    {
-      "name": "Credit Card",
-      "types": [
-        "mc",
-        "visa",
-        "amex",
-        "maestro",
-        "amex_applepay",
-        "cup",
-        "diners",
-        "discover",
-        "jcb",
-        "mc_applepay"
-      ]
-    }
-  ],
-  "paymentMethods": [
-    {
-      "details": [
-        {
-          "key": "number",
-          "type": "text"
-        },
-        {
-          "key": "expiryMonth",
-          "type": "text"
-        },
-        {
-          "key": "expiryYear",
-          "type": "text"
-        },
-        {
-          "key": "cvc",
-          "type": "text"
-        },
-        {
-          "key": "holderName",
-          "optional": true,
-          "type": "text"
-        }
-      ],
-      "name": "Credit Card",
-      "type": "scheme"
-    },
-    {
-      "details": [
-        {
-          "items": [
-            {
-              "id": "1121",
-              "name": "Test Issuer"
-            },
-            {
-              "id": "1154",
-              "name": "Test Issuer 5"
-            },
-            {
-              "id": "1153",
-              "name": "Test Issuer 4"
-            },
-            {
-              "id": "1152",
-              "name": "Test Issuer 3"
-            },
-            {
-              "id": "1151",
-              "name": "Test Issuer 2"
-            },
-            {
-              "id": "1162",
-              "name": "Test Issuer Cancelled"
-            },
-            {
-              "id": "1161",
-              "name": "Test Issuer Pending"
-            },
-            {
-              "id": "1160",
-              "name": "Test Issuer Refused"
-            },
-            {
-              "id": "1159",
-              "name": "Test Issuer 10"
-            },
-            {
-              "id": "1158",
-              "name": "Test Issuer 9"
-            },
-            {
-              "id": "1157",
-              "name": "Test Issuer 8"
-            },
-            {
-              "id": "1156",
-              "name": "Test Issuer 7"
-            },
-            {
-              "id": "1155",
-              "name": "Test Issuer 6"
-            }
-          ],
-          "key": "issuer",
-          "type": "select"
-        }
-      ],
-      "name": "iDEAL",
-      "supportsRecurring": true,
-      "type": "ideal"
-    },
-    {
-      "name": "PayPal",
-      "supportsRecurring": true,
-      "type": "paypal"
-    },
-    {
-      "details": [
-        {
-          "key": "sepa.ownerName",
-          "type": "text"
-        },
-        {
-          "key": "sepa.ibanNumber",
-          "type": "text"
-        }
-      ],
-      "name": "SEPA Direct Debit",
-      "supportsRecurring": true,
-      "type": "sepadirectdebit"
-    },
-    {
-      "name": "UnionPay",
-      "supportsRecurring": true,
-      "type": "unionpay"
-    }
-  ]
-}
-
 export default {
   computed: {
     scriptSrc () {
@@ -180,17 +40,12 @@ export default {
       }
     },
     checkoutConfig () {
-      console.log('DEBUG AdyenCard this.order.payment_source:', this.order.payment_source)
-      // console.log('DEBUG this.order.payment_source.payment_methods', this.order.payment_source.payment_methods)
-
       return {
         locale: this.$i18n.locale,
         environment: process.env.VUE_APP_ADYEN_ENV,
         originKey: process.env.VUE_APP_ADYEN_ORIGIN_KEY,
-        // paymentMethodsResponse: this.order.payment_source.payment_methods,
-        paymentMethodsResponse: paymentMethodMock,
-        // onChange: this.handleOnChange,
-        onSubmit: this.handleOnChange,
+        paymentMethodsResponse: this.order.payment_source.payment_methods,
+        onSubmit: this.handleOnSubmit,
         onAdditionalDetails: this.handleOnAdditionalDetails
       }
     }
@@ -214,30 +69,6 @@ export default {
         }
       })
     },
-    handleOnChange (state, component) {
-      if (state.isValid) {
-        let browserInfo = collectBrowserInfo()
-
-        this.$store.dispatch('updateOrderPaymentSource', {
-          payment_request_data: {
-            payment_method: state.data.paymentMethod,
-            origin: window.location.origin,
-            return_url: window.location.href,
-            browser_info: {
-              acceptHeader:
-                'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-              colorDepth: browserInfo.colorDepth,
-              javaEnabled: browserInfo.javaEnabled,
-              language: browserInfo.language,
-              screenHeight: browserInfo.screenHeight,
-              screenWidth: browserInfo.screenWidth,
-              timeZoneOffset: browserInfo.timeZoneOffset,
-              userAgent: browserInfo.userAgent
-            }
-          }
-        })
-      }
-    },
     handleOnAdditionalDetails (state, component) {
       this.$store
         .dispatch('updateOrderPaymentSource', {
@@ -249,6 +80,33 @@ export default {
           let checkout = new AdyenCheckout(this.checkoutConfig)
           this.handlePaymentResponse(paymentSource.payment_response, checkout)
         })
+    },
+    handleOnSubmit  (state, component) {
+      if (state.isValid) {
+        let browserInfo = collectBrowserInfo()
+        this.$store.dispatch('updateOrderPaymentSource', {
+          payment_request_data: {
+            payment_method: state.data.paymentMethod,
+            origin: window.location.origin,
+            returnUrl: window.location.href,
+            browserInfo: {
+              acceptHeader:
+                'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+              colorDepth: browserInfo.colorDepth,
+              javaEnabled: browserInfo.javaEnabled,
+              language: browserInfo.language,
+              screenHeight: browserInfo.screenHeight,
+              screenWidth: browserInfo.screenWidth,
+              timeZoneOffset: browserInfo.timeZoneOffset,
+              userAgent: browserInfo.userAgent
+            }
+          },
+          _authorize: 1
+        }).then(paymentSource => {
+          let checkout = new AdyenCheckout(this.checkoutConfig)
+          this.handlePaymentResponse(paymentSource.payment_response, checkout)
+        })
+      }
     },
     handlePayment (checkout) {
       this.loading_payment = true

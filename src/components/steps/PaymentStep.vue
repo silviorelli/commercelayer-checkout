@@ -64,7 +64,6 @@ export default {
     },
     availablePaymentOptions () {
       let paymentOptions = []
-      console.log('DEBUG PaymentStep this.order:', this.order)
       _.each(this.order.available_payment_methods, paymentMethod => {
         switch (paymentMethod.payment_source_type) {
           case 'adyen_payments':
