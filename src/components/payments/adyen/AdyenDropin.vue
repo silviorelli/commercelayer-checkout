@@ -88,7 +88,7 @@ export default {
           payment_request_data: {
             payment_method: state.data.paymentMethod,
             origin: window.location.origin,
-            returnUrl: window.location.href,
+            returnUrl: window.location.href + '/adyenDropin',
             browserInfo: {
               acceptHeader:
                 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',

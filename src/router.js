@@ -74,6 +74,41 @@ const router = new Router({
               })
           }
         },
+        // {
+        //   path: 'adyenDropin',
+        //   beforeEnter (routeTo, routeFrom, next) {
+        //     let paymentSourceAttributes = {
+        //       adyen_dropin_payload: routeTo.query.payload,
+        //       adyen_dropin_type: routeTo.query.type,
+        //       adyen_dropin_result_code: routeTo.query.resultCode
+        //     }
+        //     store
+        //       .dispatch('updateOrderPaymentSource', paymentSourceAttributes)
+        //       .then(() => {
+        //         store.dispatch('placeOrder')
+        //       })
+        //       .catch(error => {
+        //         console.log(error)
+
+        //         next({
+        //           name: 'checkout'
+        //         })
+        //       })
+        //   }
+        // },
+        {
+          path: 'adyenDropin',
+          beforeEnter (routeTo, routeFrom, next) {
+            store
+              .dispatch('placeOrder')
+              .catch(error => {
+                console.log(error)
+                next({
+                  name: 'checkout'
+                })
+              })
+          }
+        },
         {
           path: 'confirmation',
           name: 'confirmation',
